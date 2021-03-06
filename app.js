@@ -22,50 +22,54 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
-app.post('/api/signup', (req, res, next) => {
+app.post('/api/auth/signup', (req, res, next) => {
+  console.log(req.body);
   /*delete req.body._id;*/
   const user = new User({
     email: req.body.email,
     password: req.body.password
   });
+  console.log(user);
   user.save()
     .then(() => res.status(201).json({message: 'Utilisateur enregistré !'}))
-    .catch((error) => res.status(400).json({ error }));
+    .catch((error) => res.status(400).json({message: "Une erreur est survenue !" }));
 });
-/*app.post('http://localhost:3000/api/login', (req, res, next) => {
-  const user = new User({
-    email: req.body.email,
-    password: req.body.password
+
+app.post('/api/auth/login', (req, res) => {
+  console.log('login');
+});
+/*
+app.post('/api/auth/sauces', (req, res, next) => {
+  const sauce = new Sauce({
+  ...req.body
   });
-  
-  user.save()
+  sauce.save()
     .then(() => res.status(201).json({userId: String, token:String}))
     .catch((error) => res.status(400).json({ error}));
 });
 
-app.post('http://localhost:3000/api/sauces', (req, res, next) => {
+app.post('/api/auth/sauces/:id/like', (req, res, next) => {
   console.log(req, body);
 });
 
-app.post('http://localhost:3000/api/sauces/:id/like', (req, res, next) => {
+app.put('/api/auth/sauces/:id', (req, res, next) => {
   console.log(req, body);
 });
 
-app.put('http://localhost:3000/api/sauces/:id', (req, res, next) => {
+app.delete('/api/auth/sauces/:id', (req, res, next) => {
   console.log(req, body);
 });
 
-app.delete('http://localhost:3000/api/sauces/:id', (req, res, next) => {
-  console.log(req, body);
+app.get('/api/auth/sauces', (req, res, next) => {
+  Sauce.find()
+    .then((sauces) => res.status(200).json(sauces))
+    .catch((error) => res.status(400).jason({ error}));
 });
 
-app.get('http://localhost:3000/api/sauces', (req, res, next) => {
-  console.log(req, body);
-});
-
-app.get('http://localhost:3000/api/sauces/:id', (req, res, next) => {
-  
-  
+app.get('/api/sauces/auth/:id', (req, res, next) => {
+  Sauce.findOne({_id: req.params.id})
+    .then((sauce) => res.status(200).json(sauce))
+    .catch((error) => res.status(404).json({ error }));
 });*/
 
 module.exports = app;
