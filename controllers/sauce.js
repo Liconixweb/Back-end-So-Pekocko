@@ -16,16 +16,16 @@ exports.createSauce = (req, res, next) => {
 };
 
 exports.createSauceLike = (req, res, next) => {
-    const id = req.body.userId;
-    db.sauces.update(
-        { userId: id, like: 1 });
-    lastError = db.getLastError();
-    if (lastError){
-        db.sauces.update({userId: id}, {$inc: {likes: 1}})
-    }    
-    Sauce.findOne({ userId })
-        .then(() => res.status(201).json({message : 'Sauce likée !'}))
-        .catch((error) => res.status(400).json({ error }));
+    Sauce.findOne({ _id: req.params.id })
+      .then(() => {const like = {};
+            if (req.body.like === 1) {like.$inc = {likes: 1}
+            } else if (req.body.like === 0) {like.$inc = {likes:-1}
+            } else if (req.body.like === -1) {like.$inc = {dislikes: 1}}
+        Sauce.updateOne(like)
+            .then((sauce) => res.status(200).json(sauce))
+            .catch((error) => res.status(400).json({ error }));
+        }) 
+      .catch((error) => res.status(404).json({ error }));   
 };
 
 exports.modifySauce = (req, res, next) => {
