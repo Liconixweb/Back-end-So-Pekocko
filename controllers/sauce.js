@@ -1,8 +1,9 @@
 const Sauce = require('../models/sauce');
 const fs = require('fs');
 const { db } = require('../models/sauce');
+const sauce = require('../models/sauce');
 
-
+//Création d'une sauce
 exports.createSauce = (req, res, next) => {
     const sauceObject = JSON.parse(req.body.sauce);
     delete sauceObject._id;
@@ -15,19 +16,54 @@ exports.createSauce = (req, res, next) => {
       .catch((error) => res.status(400).json({ error }));
 };
 
-exports.createSauceLike = (req, res, next) => {
+//Création d'un like ou un dislike sur une sauce
+exports.createSauceLike = (req, res, next) => {            
     Sauce.findOne({ _id: req.params.id })
-      .then(() => {const like = {};
-            if (req.body.like === 1) {like.$inc = {likes: 1}
-            } else if (req.body.like === 0) {like.$inc = {likes:-1}
-            } else if (req.body.like === -1) {like.$inc = {dislikes: 1}}
-        Sauce.updateOne(like)
-            .then((sauce) => res.status(200).json(sauce))
-            .catch((error) => res.status(400).json({ error }));
+        .then((sauce) => {
+            const like = {};      
+            console.log(req.body.userId);
+            console.log(sauce.usersLiked);
+            console.log(sauce.usersDisliked);
+            
+            if (req.body.like === 1) {
+                if (sauce.usersLiked.includes(req.body.userId)) {
+                    { message: 'La sauce est déjà aimé !'}
+                } else {
+                    like.$inc = { likes: 1 };
+                    like.$addToSet = { usersLiked: req.body.userId };
+                    console.log('like possible'); 
+                }    
+            console.log(like);            
+            } else if (req.body.like === 0) {
+                if (sauce.usersLiked.includes(req.body.userId)) { 
+                    like.$inc = { likes: -1 };
+                    like.$pull = { usersLiked: req.body.userId };
+                } else {
+                    like.$inc = { dislikes: -1 };
+                    like.$pull = { usersDisliked: req.body.userId };    
+                }       
+                console.log('like ou dislike après like ou dislike');
+            console.log(req.body.like);
+            } else if (req.body.like === -1){
+                if (sauce.usersDisliked.includes(req.body.userId)) {
+                    { message: 'La sauce est déjà pas aimé !'}
+                } else {
+                    like.$inc = { dislikes: 1 };
+                    like.$pull = { usersLiked: req.body.userId };
+                    like.$addToSet = { usersDisliked: req.body.userId };
+                console.log('dislike possible'); 
+                }
+            console.log(like);
+            }
+            console.log('then marche');
+            Sauce.updateOne(like)
+                .then((sauce) => res.status(200).json(sauce))
+                .catch((error) => res.status(400).json({ error }));
         }) 
-      .catch((error) => res.status(404).json({ error }));   
+        .catch((error) => res.status(404).json({ message: error }));   
 };
 
+//Modification d'une sauce
 exports.modifySauce = (req, res, next) => {
     const sauceObject = req.file ?
         {
@@ -39,6 +75,7 @@ exports.modifySauce = (req, res, next) => {
         .catch((error) => res.status(400).json({ error }));
 };
 
+//Suppression d'une sauce
 exports.deleteSauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
         .then((sauce) => {
@@ -52,12 +89,14 @@ exports.deleteSauce = (req, res, next) => {
         .catch((error) => res.status(500).json({ error }));    
 };
 
+//Consultation d'une sauce
 exports.getOneSauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
       .then((sauce) => res.status(200).json(sauce))
       .catch((error) => res.status(404).json({ error }));
 };
 
+//Consultation de toutes les sauces
 exports.getAllSauce = (req, res, next) => {
     Sauce.find()
       .then((sauces) => res.status(200).json(sauces))      
