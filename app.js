@@ -10,15 +10,14 @@ const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100
 });
+require('dotenv').config();
 
 const app = express();
 
 const userRoutes = require('./routes/user');
 const sauceRoutes = require('./routes/sauce');
 
-
-
-mongoose.connect('mongodb+srv://visitor:visitorOC06032021@cluster0.qfs5y.mongodb.net/SoPekocko?retryWrites=true&w=majority',
+mongoose.connect(process.env.MONGODB,
   { useNewUrlParser: true,
     useUnifiedTopology: true })
   .then(() => console.log('Connexion à MongoDB réussie !'))
@@ -45,7 +44,5 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use('/api/auth', userRoutes, apiLimiter);
 app.use('/api/sauces', sauceRoutes, apiLimiter);
-
-
 
 module.exports = app;
