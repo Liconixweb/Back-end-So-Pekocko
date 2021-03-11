@@ -2,7 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const path = require('path');
+
 const helmet = require('helmet');
+const mongoSanitize = require ('express-mongo-sanitize');
 
 const app = express();
 
@@ -24,10 +26,15 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use (bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use(helmet());
 app.disable('x-powered-by');
+
+app.use(mongoSanitize( {
+  replaceWith: '_'
+}));
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
