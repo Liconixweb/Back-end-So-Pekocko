@@ -5,6 +5,11 @@ const path = require('path');
 
 const helmet = require('helmet');
 const mongoSanitize = require ('express-mongo-sanitize');
+const rateLimit = require('express-rate-limit');
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100
+});
 
 const app = express();
 
@@ -38,8 +43,8 @@ app.use(mongoSanitize( {
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-app.use('/api/auth', userRoutes);
-app.use('/api/sauces', sauceRoutes);
+app.use('/api/auth', userRoutes, apiLimiter);
+app.use('/api/sauces', sauceRoutes, apiLimiter);
 
 
 
