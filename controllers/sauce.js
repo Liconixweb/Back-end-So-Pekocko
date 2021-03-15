@@ -22,20 +22,14 @@ exports.createSauce = (req, res, next) => {
 exports.createSauceLike = (req, res, next) => {            
     Sauce.findOne({ _id: req.params.id })
         .then((sauce) => {
-            const like = {};      
-            console.log(req.body.userId);
-            console.log(sauce.usersLiked);
-            console.log(sauce.usersDisliked);
-            
+            const like = {};                  
             if (req.body.like === 1) {
                 if (sauce.usersLiked.includes(req.body.userId)) {
                     { message: 'La sauce est déjà aimé !'}
                 } else {
                     like.$inc = { likes: 1 };
                     like.$addToSet = { usersLiked: req.body.userId };
-                    console.log('like possible'); 
-                }    
-            console.log(like);            
+                }              
             } else if (req.body.like === 0) {
                 if (sauce.usersLiked.includes(req.body.userId)) { 
                     like.$inc = { likes: -1 };
@@ -44,8 +38,6 @@ exports.createSauceLike = (req, res, next) => {
                     like.$inc = { dislikes: -1 };
                     like.$pull = { usersDisliked: req.body.userId };    
                 }       
-                console.log('like ou dislike après like ou dislike');
-            console.log(req.body.like);
             } else if (req.body.like === -1){
                 if (sauce.usersDisliked.includes(req.body.userId)) {
                     { message: 'La sauce est déjà pas aimé !'}
@@ -53,12 +45,12 @@ exports.createSauceLike = (req, res, next) => {
                     like.$inc = { dislikes: 1 };
                     like.$pull = { usersLiked: req.body.userId };
                     like.$addToSet = { usersDisliked: req.body.userId };
-                console.log('dislike possible'); 
                 }
-            console.log(like);
             }
-            console.log('then marche');
-            Sauce.updateOne(like)
+            Sauce.updateOne(
+                { _id: req.params.id },
+                {...like,  _id: req.params.id }
+                )
                 .then((sauce) => res.status(200).json(sauce))
                 .catch((error) => res.status(400).json({ error }));
         }) 
